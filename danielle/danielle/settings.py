@@ -1,3 +1,8 @@
+from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+
 """
 Django settings for danielle project.
 
@@ -11,13 +16,12 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 #from pathlib import Path
-import os
-import django_heroku
-import dj_database_url
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 #BASE_DIR = Path(__file__).resolve().parent.parent
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -50,6 +54,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'people',
     'utils',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
@@ -62,8 +67,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES':
     ('rest_framework.permissions.IsAuthenticated', ),
     'DEFAULT_FILTER_BACKENDS':
-    ['django_filters.rest_framework.DjangoFilterBackend']
+    ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -83,7 +90,7 @@ ROOT_URLCONF = 'danielle.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR/ 'templates'],  # 👈 ESSA LINHA É A CHAVE
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,19 +111,15 @@ WSGI_APPLICATION = 'danielle.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'danielledb',
-        'USER': 'root',
-        'PASSWORD': 'root1234',
-        'TEST': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'test_danielledb'
-        },
-    },
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    }
 }
 
-db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
-if db_from_env:
-    DATABASES['default'].update(db_from_env)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -156,4 +159,4 @@ USE_L10N = True
 
 STATIC_URL = '/static/'
 
-django_heroku.settings(locals())  # Put it in the last line.
+
