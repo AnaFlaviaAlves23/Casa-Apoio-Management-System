@@ -1,9 +1,10 @@
 from django.urls import path, include
 from people import views
-from people.views.dashboard import dashboard  # Importando a sua função do dashboard
+from people.views.dashboard import dashboard
 from rest_framework.routers import DefaultRouter
 
-# Configuração das rotas da API (ViewSet)
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
 router = DefaultRouter()
 router.register('people', views.PersonViewSet)
 router.register('checkins', views.CheckinViewSet)
@@ -11,8 +12,10 @@ router.register('patient_companion_checkin', views.PatientCompanionCheckinViewSe
 router.register('home_services', views.HomeServicesViewSet)
 router.register('professional_services', views.ProfessionalServicesViewSet)
 
-# O segredo está aqui: as rotas que o Django realmente "enxerga"
 urlpatterns = [
-    path('dashboard/', dashboard, name='dashboard'),  # Criando o caminho para o dashboard!
-    path('', include(router.urls)),                   # Incluindo as rotas da API
+    path('dashboard/', dashboard, name='dashboard'),
+    path('api/', include(router.urls)), # Coloquei 'api/' para organizar melhor
+     # ESTAS SÃO AS LINHAS QUE FALTAVAM PARA O SWAGGER:
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
